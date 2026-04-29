@@ -23,6 +23,20 @@ def main():
                 # read csv as dictionary
                 reader = csv.DictReader(file)
 
+                    # Expected headers
+                requiredHeaders = [
+                    "survey_date",
+                    "volunteer_name",
+                    "site_name",
+                    "species_name",
+                    "count"
+                ]
+
+                # Check headers
+                if reader.fieldnames != requiredHeaders:
+                    print("Error, incorrect csv format in", fileName)
+                    continue
+
                 # loop through each row
                 for row in reader:
                     print(row)
