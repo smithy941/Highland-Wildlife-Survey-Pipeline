@@ -16,6 +16,8 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
+errorLogFile = "data/error-logs/error-log.txt"
+
 # check date is YYYY-MM-DD
 def isValidDate(dateText):
 
@@ -60,6 +62,13 @@ def siteExists(siteName):
     else:
         return False
 
+# add rejected rows to error log
+def logError(fileName, row, reason):
+
+    # append adds to end. formatted string allows variables
+    with open(errorLogFile, "a") as logFile:
+        logFile.write(f"{fileName} | {reason} | {row}\n")
+
 def main():
 
     # loop through files in folder
@@ -79,7 +88,7 @@ def main():
                 # read csv as dictionary
                 reader = csv.DictReader(file)
 
-                # Expected headers
+                # expected headers
                 requiredHeaders = [
                     "survey_date",
                     "volunteer_name",
@@ -88,7 +97,7 @@ def main():
                     "count"
                 ]
 
-                # Check headers
+                # check headers
                 if reader.fieldnames != requiredHeaders:
                     print("Error, incorrect csv format in", fileName)
                     continue
@@ -97,21 +106,47 @@ def main():
                 for row in reader:
 
                     if not isValidDate(row["survey_date"]):
-                        print("Invalid row, check date:", row)
+                        logError(fileName, row, "Invalid date")
                         continue
 
                     if not isValidCount(row["count"]):
-                        print("Invalid row, check count:", row)
+                        logError(fileName, row, "Invalid count")
                         continue
 
                     if not speciesExists(row["species_name"]):
-                        print("Invalid row, species not found:", row)
+                        logError(fileName, row, "Species not found")
                         continue
 
                     if not siteExists(row["site_name"]):
-                        print("Invalid row, site not found:", row)
+                        logError(fileName, row, "Site not found")
                         continue
 
-                    print("Valid row:", row)
+                    # get ids needed for inserting into db
+                    cursor.execute("SELECT volunteer_id FROM volunteers WHERE name = %s", (row["volunteer_name"],))
+                    volunteerId = cursor.fetchone()[0] #[0] gets first value
+
+                    cursor.execute("SELECT site_id FROM survey_sites WHERE site_name = %s", (row["site_name"],))
+                    siteId = cursor.fetchone()[0]
+
+                    cursor.execute("SELECT species_id FROM species WHERE species_name = %s", (row["species_name"],))
+                    speciesId = cursor.fetchone()[0]
+
+                    # insert survey session
+                    cursor.execute(
+                        "INSERT INTO survey_sessions (volunteer_id, site_id, survey_date) VALUES (%s, %s, %s)",
+                        (volunteerId, siteId, row["survey_date"])
+                    )
+                    
+                    sessionId = cursor.lastrowid
+
+                    # insert sighting linked to sessionId
+                    cursor.execute(
+                        "INSERT INTO sightings (session_id, species_id, count) VALUES (%s, %s, %s)",
+                        (sessionId, speciesId, int(row["count"]))
+                    )
+
+                    db.commit()
+
+                    print("Inserted valid row:", row)
 
 main()
