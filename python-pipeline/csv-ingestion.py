@@ -6,7 +6,7 @@ import mysql.connector
 # csv files folder
 incomingFolder = "data/incoming-csv"
 
-# Connect to database
+# connect to database
 db = mysql.connector.connect(
     host="localhost",
     user="student",
