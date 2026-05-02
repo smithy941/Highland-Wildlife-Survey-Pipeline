@@ -36,7 +36,7 @@ JSON was used for the API because:
 - It is faster to transmit over a network  
 - It is easy to parse and use in web applications 
 
-This makes JSON suited to returning data to the frontend in the JSON report service.
+This makes JSON suited to returning data to the client in the JSON report service.
 
 XML was used for data exchange and reporting because:
 

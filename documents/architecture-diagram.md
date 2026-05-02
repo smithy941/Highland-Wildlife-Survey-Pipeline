@@ -3,7 +3,7 @@
 ![Architecture Diagram](images/architecture.png)
 
 ## Overview
-This diagram shows how data moves through the system.
+This diagram shows the structure of the system.
 
 ## Components
 
