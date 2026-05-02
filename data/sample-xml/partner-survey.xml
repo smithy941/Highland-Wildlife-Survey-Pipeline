@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<partner_survey>
+    <survey_date>2026-03-01</survey_date>
+    <volunteer_name>John Smith</volunteer_name>
+    <site_name>Forest</site_name>
+
+    <observations>
+        <observation>
+            <species_name>Red Squirrel</species_name>
+            <count>2</count>
+        </observation>
+
+        <observation>
+            <species_name>Golden Eagle</species_name>
+            <count>1</count>
+        </observation>
+    </observations>
+</partner_survey>
